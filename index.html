@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>零想科技 LINGX DreamWorks | 点亮每个人心中的梦境</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #050508;
+            --accent-purple: #8b5cf6;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #22d3ee;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Particle Canvas */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(5,5,8,0.8), transparent);
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            color: var(--text-primary);
+            text-decoration: none;
+            opacity: 0;
+            animation: fadeIn 1.5s ease forwards;
+            animation-delay: 0.5s;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.85rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.4s ease;
+            opacity: 0;
+            animation: fadeIn 1.5s ease forwards;
+        }
+
+        .nav-links a:nth-child(1) { animation-delay: 0.6s; }
+        .nav-links a:nth-child(2) { animation-delay: 0.7s; }
+        .nav-links a:nth-child(3) { animation-delay: 0.8s; }
+        .nav-links a:nth-child(4) { animation-delay: 0.9s; }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            padding: 0 2rem;
+        }
+
+        .slogan {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 500;
+            line-height: 1.3;
+            letter-spacing: 0.08em;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 1s;
+        }
+
+        .slogan-en {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            font-weight: 200;
+            letter-spacing: 0.4em;
+            color: var(--text-secondary);
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 1.3s;
+        }
+
+        /* Scroll Indicator */
+        .scroll-hint {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 1.5s ease forwards;
+            animation-delay: 2s;
+        }
+
+        .scroll-hint span {
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--accent-cyan), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        /* Section Styles */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 8rem 4rem;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+            font-weight: 300;
+        }
+
+        /* About Section */
+        .about {
+            background: linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.03), transparent);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about-card {
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.5s ease;
+        }
+
+        .about-card:hover {
+            background: rgba(139, 92, 246, 0.05);
+            border-color: rgba(139, 92, 246, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .about-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .about-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        /* Projects Section */
+        .projects {
+            background: var(--bg-deep);
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .project-card {
+            aspect-ratio: 16/10;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.2), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            transform: scale(1.02);
+        }
+
+        .project-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .project-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Contact Section */
+        .contact {
+            background: linear-gradient(180deg, transparent, rgba(34, 211, 238, 0.02), transparent);
+            text-align: center;
+        }
+
+        .contact-email {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: all 0.4s ease;
+        }
+
+        .contact-email:hover {
+            color: var(--accent-purple);
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem 4rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(1.1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 1.5rem 2rem;
+            }
+            
+            .nav-links {
+                gap: 1.5rem;
+            }
+            
+            .nav-links a {
+                font-size: 0.75rem;
+            }
+            
+            section {
+                padding: 4rem 2rem;
+            }
+            
+            .about-grid,
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles"></canvas>
+
+    <nav class="nav">
+        <a href="#" class="logo">LINGX</a>
+        <ul class="nav-links">
+            <li><a href="#about">关于</a></li>
+            <li><a href="#projects">项目</a></li>
+            <li><a href="#experience">体验</a></li>
+            <li><a href="#contact">联系</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="slogan">点亮每个人心中的梦境</h1>
+            <p class="slogan-en">LIGHT UP YOUR DREAMWORLD</p>
+        </div>
+        <div class="scroll-hint">
+            <span>探索</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <h2 class="section-title">关于零想</h2>
+        <p class="section-subtitle">我们相信，每个人的心中都有一片未被触达的梦境。</p>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>AI 驱动</h3>
+                <p>以人工智能为核心引擎，结合深度学习与生成式AI，为用户创造个性化的沉浸式体验。</p>
+            </div>
+            <div class="about-card">
+                <h3>XR 沉浸</h3>
+                <p>融合VR/AR/MR技术，打破现实与虚拟的边界，让用户体验前所未有的感官盛宴。</p>
+            </div>
+            <div class="about-card">
+                <h3>社交娱乐</h3>
+                <p>打造下一代社交娱乐平台，让人们在虚拟世界中建立真实的情感连接。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="projects" id="projects">
+        <h2代表作品 class="section-title">代表作品</h2>
+        <p class="section-subtitle">用技术诠释想象，用产品讲述故事。</p>
+        <div class="project-grid">
+            <div class="project-card">
+                <h3>DREAM SPACE</h3>
+                <p>AI生成的沉浸式虚拟空间，让每个人都能创建自己的梦境世界。</p>
+            </div>
+            <div class="project-card">
+                <h3>NEURAL LINK</h3>
+                <p>下一代社交接口，用脑波交互重新定义虚拟社交体验。</p>
+            </div>
+            <div class="project-card">
+                <h3>QUANTUM CHAT</h3>
+                <p>基于量子计算的多维即时通讯系统，开启通讯新纪元。</p>
+            </div>
+            <div class="project-card">
+                <h3>HOLOGRAM</h3>
+                <p>全息投影技术方案，为现实世界注入科幻色彩。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <h2 class="section-title">联系我们</h2>
+        <p class="section-subtitle">一起探索梦境的边界。</p>
+        <a href="mailto:hello@lingx.ai" class="contact-email">hello@lingx.ai</a>
+    </section>
+
+    <footer>
+        <p>© 2022-2026 LINGX DreamWorks. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Particle System
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        
+        let particles = [];
+        const particleCount = 120;
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 2 + 0.5,
+                    alpha: Math.random() * 0.5 + 0.1,
+                    hue: Math.random() > 0.5 ? 270 : 200 + Math.random() * 60
+                });
+            }
+        }
+        
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach((p, i) => {
+                // Update position
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                // Wrap around edges
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                
+                // Draw glow
+                const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
+                gradient.addColorStop(0, `hsla(${p.hue}, 80%, 70%, ${p.alpha})`);
+                gradient.addColorStop(0.5, `hsla(${p.hue}, 70%, 50%, ${p.alpha * 0.3})`);
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // Draw core
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${p.hue}, 90%, 80%, ${p.alpha + 0.3})`;
+                ctx.fill();
+            });
+            
+            // Draw connections
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 150) {
+                        const alpha = (1 - dist / 150) * 0.15;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `hsla(260, 70%, 60%, ${alpha})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+            
+            requestAnimationFrame(drawParticles);
+        }
+        
+        // Initialize
+        window.addEventListener('resize', () => {
+            resize();
+            createParticles();
+        });
+        
+        resize();
+        createParticles();
+        drawParticles();
+        
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
