@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-04-20T12:24:05.718Z",
+  "workspaceRoot": "/home/tance/.openclaw/workspace/lingx-website",
+  "weightsSource": "default",
+  "prompt": "请根据 nanoprompt.md 的要求优化 index.html，增强科技感和视觉效果，优化移动端适配。",
+  "taskCandidates": [],
+  "taskUnresolved": [
+    "no terrain node matched prompt signals"
+  ],
+  "actionCandidates": [],
+  "touchedFiles": []
+}

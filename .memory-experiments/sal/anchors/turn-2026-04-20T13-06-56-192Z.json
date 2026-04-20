@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-04-20T13:06:56.192Z",
+  "workspaceRoot": "/home/tance/.openclaw/workspace/lingx-website",
+  "weightsSource": "default",
+  "prompt": "read nanoprompt.md",
+  "taskCandidates": [],
+  "taskUnresolved": [
+    "no terrain node matched prompt signals"
+  ],
+  "actionCandidates": [],
+  "touchedFiles": []
+}
