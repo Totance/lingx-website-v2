@@ -6,15 +6,19 @@
     <title>零想科技 LINGX DreamWorks | 点亮每个人心中的梦境</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Syne:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-deep: #050508;
+            --bg-card: rgba(255, 255, 255, 0.02);
             --accent-purple: #8b5cf6;
             --accent-blue: #3b82f6;
             --accent-cyan: #22d3ee;
+            --accent-pink: #e879f9;
             --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
 
         * {
@@ -28,14 +32,14 @@
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', 'Noto Sans SC', sans-serif;
             background: var(--bg-deep);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Particle Canvas */
+        /* 简洁粒子 Canvas */
         #particles {
             position: fixed;
             top: 0;
@@ -43,48 +47,143 @@
             width: 100%;
             height: 100%;
             z-index: 0;
+            pointer-events: none;
         }
 
-        /* Navigation */
+        /* Navigation - 初始隐藏，滚动后出现 */
         .nav {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            padding: 2rem 4rem;
+            padding: 1.5rem 4rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
-            background: linear-gradient(to bottom, rgba(5,5,8,0.8), transparent);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .nav.scrolled {
+            background: rgba(5, 5, 8, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1rem 4rem;
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .logo {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: 0.3em;
-            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             text-decoration: none;
             opacity: 0;
             animation: fadeIn 1.5s ease forwards;
             animation-delay: 0.5s;
         }
 
+        .logo-img {
+            height: 32px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            color: var(--text-primary);
+        }
+
         .nav-links {
             display: flex;
-            gap: 3rem;
+            gap: 2.5rem;
             list-style: none;
+        }
+        
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 101;
+        }
+        
+        .mobile-menu-btn span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+        
+        /* Mobile menu */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(5, 5, 8, 0.98);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        
+        .mobile-nav.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .mobile-nav a {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-nav a:hover {
+            color: var(--accent-cyan);
         }
 
         .nav-links a {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 300;
             letter-spacing: 0.15em;
             color: var(--text-secondary);
             text-decoration: none;
             text-transform: uppercase;
-            transition: color 0.4s ease;
+            transition: all 0.4s ease;
+            position: relative;
             opacity: 0;
             animation: fadeIn 1.5s ease forwards;
         }
@@ -93,9 +192,25 @@
         .nav-links a:nth-child(2) { animation-delay: 0.7s; }
         .nav-links a:nth-child(3) { animation-delay: 0.8s; }
         .nav-links a:nth-child(4) { animation-delay: 0.9s; }
+        .nav-links a:nth-child(5) { animation-delay: 1.0s; }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-cyan);
+            transition: width 0.3s ease;
+        }
 
         .nav-links a:hover {
-            color: var(--accent-cyan);
+            color: var(--text-primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
         }
 
         /* Hero Section */
@@ -115,27 +230,177 @@
             padding: 0 2rem;
         }
 
-        .slogan {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(2.5rem, 8vw, 5rem);
+        .hero-logo-container {
+            position: relative;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-logo {
+            height: 60px;
+            width: auto;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards, logoGlow 3s ease-in-out infinite;
+            animation-delay: 0.3s, 1.5s;
+        }
+        
+        .hero-logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(59, 130, 246, 0.15) 30%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(30px);
+            animation: pulseGlow 4s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3)); }
+            50% { filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 50px rgba(59, 130, 246, 0.3)); }
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        }
+        
+        /* 科技网格背景 */
+        .hero-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(60px); }
+        }
+        
+        /* 浮动光球 */
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.4;
+            animation: floatOrb 15s ease-in-out infinite;
+        }
+        
+        .orb1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%);
+            top: 10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+        
+        .orb2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+            top: 50%;
+            right: -5%;
+            animation-delay: -5s;
+        }
+        
+        .orb3 {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.3) 0%, transparent 70%);
+            bottom: 20%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+        
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(-30px, -20px) scale(1.02); }
+        }
+
+        .hero-slogan-large {
+            font-family: 'Syne', 'Noto Sans SC', sans-serif;
+            font-size: clamp(2.5rem, 7vw, 4.5rem);
             font-weight: 500;
             line-height: 1.3;
-            letter-spacing: 0.08em;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             opacity: 0;
             animation: fadeInUp 1.2s ease forwards;
-            animation-delay: 1s;
+            animation-delay: 0.8s;
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 50%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .slogan-en {
             font-family: 'Outfit', sans-serif;
-            font-size: clamp(1rem, 3vw, 1.5rem);
+            font-size: clamp(0.9rem, 2.5vw, 1.3rem);
             font-weight: 200;
-            letter-spacing: 0.4em;
+            letter-spacing: 0.5em;
             color: var(--text-secondary);
+            margin-bottom: 2rem;
             opacity: 0;
             animation: fadeInUp 1.2s ease forwards;
-            animation-delay: 1.3s;
+            animation-delay: 1.1s;
+        }
+
+        .brand-tagline {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 1.4s;
+        }
+
+        .brand-tagline-en {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 200;
+            margin-top: 0.5rem;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 1.6s;
+        }
+
+        .cta-button {
+            display: inline-block;
+            margin-top: 3rem;
+            padding: 1rem 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 300;
+            letter-spacing: 0.25em;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.4s ease;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: 1.8s;
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-button:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
         }
 
         /* Scroll Indicator */
@@ -150,186 +415,613 @@
             gap: 0.5rem;
             opacity: 0;
             animation: fadeIn 1.5s ease forwards;
-            animation-delay: 2s;
+            animation-delay: 2.5s;
         }
 
         .scroll-hint span {
             font-size: 0.7rem;
             letter-spacing: 0.3em;
-            color: var(--text-secondary);
+            color: var(--text-muted);
             text-transform: uppercase;
         }
 
-        .scroll-line {
-            width: 1px;
-            height: 60px;
-            background: linear-gradient(to bottom, var(--accent-cyan), transparent);
-            animation: scrollPulse 2s ease-in-out infinite;
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 1px solid var(--accent-cyan);
+            border-bottom: 1px solid var(--accent-cyan);
+            transform: rotate(45deg);
+            animation: scrollBounce 2s ease-in-out infinite;
         }
 
-        /* Section Styles */
+        @keyframes scrollBounce {
+            0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.3; }
+            50% { transform: rotate(45deg) translateY(5px); opacity: 1; }
+        }
+
+        /* Section Base */
         section {
             position: relative;
             z-index: 1;
-            padding: 8rem 4rem;
+            padding: 10rem 4rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
         }
 
         .section-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 2.5rem;
+            font-family: 'Syne', 'Noto Sans SC', sans-serif;
+            font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 400;
             letter-spacing: 0.15em;
-            margin-bottom: 2rem;
-            text-align: center;
+            margin-bottom: 1rem;
         }
 
         .section-subtitle {
             font-size: 1rem;
             color: var(--text-secondary);
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto 4rem;
             font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .section-line {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+            margin: 2rem auto 0;
         }
 
         /* About Section */
         .about {
-            background: linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.03), transparent);
+            background: linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.03) 20%, rgba(139, 92, 246, 0.03) 80%, transparent);
         }
 
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3rem;
+        .about-content {
             max-width: 1200px;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
         }
 
-        .about-card {
-            padding: 2.5rem;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            transition: all 0.5s ease;
+        .timeline {
+            position: relative;
         }
 
-        .about-card:hover {
-            background: rgba(139, 92, 246, 0.05);
-            border-color: rgba(139, 92, 246, 0.2);
-            transform: translateY(-5px);
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(180deg, transparent, var(--accent-cyan), transparent);
         }
 
-        .about-card h3 {
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem 0;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.8s ease;
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .timeline-item:nth-child(even) {
+            justify-content: flex-end;
+            transform: translateX(30px);
+        }
+
+        .timeline-item:nth-child(even).visible {
+            transform: translateX(0);
+        }
+
+        .timeline-year {
             font-family: 'Syne', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 500;
-            letter-spacing: 0.1em;
-            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            font-weight: 600;
             color: var(--accent-cyan);
+            margin-right: 2rem;
+            position: relative;
         }
 
-        .about-card p {
+        .timeline-item:nth-child(even) .timeline-year {
+            margin-right: 0;
+            margin-left: 2rem;
+        }
+
+        .timeline-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-purple);
+        }
+
+        .about-story {
+            padding: 2rem;
+        }
+
+        .about-story h3 {
+            font-family: 'Syne', 'Noto Sans SC', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .about-story p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 2;
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+
+        .about-story p.en {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Quote Card */
+        .quote-card {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .quote-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-family: 'Syne', serif;
+            font-size: 4rem;
+            color: var(--accent-purple);
+            opacity: 0.3;
+            line-height: 1;
+        }
+
+        .quote-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quote-author {
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+        }
+
+        .quote-desc {
+            margin-top: 1.5rem;
             font-size: 0.9rem;
             color: var(--text-secondary);
             line-height: 1.8;
-            font-weight: 300;
         }
 
-        /* Projects Section */
-        .projects {
+        /* Era Section */
+        .era {
             background: var(--bg-deep);
         }
 
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            max-width: 1000px;
+        .era-grid {
+            max-width: 1200px;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
         }
 
-        .project-card {
-            aspect-ratio: 16/10;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .era-card {
+            padding: 2.5rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 2rem;
-            cursor: pointer;
+            text-align: center;
             transition: all 0.5s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .project-card::before {
+        .era-card::before {
             content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+            transform: scaleX(0);
+            transition: transform 0.5s ease;
+        }
+
+        .era-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .era-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .era-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .era-year {
+            font-family: 'Syne', sans-serif;
+            font-size: 3rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .era-name {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            letter-spacing: 0.15em;
+        }
+
+        .era-name-en {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        .era-desc {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Products Section */
+        .products {
+            background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.02), transparent);
+        }
+
+        .products-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .product-card {
+            padding: 2.5rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .product-card:hover {
+            background: rgba(139, 92, 246, 0.05);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .product-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .product-card h4 {
+            font-family: 'Syne', 'Noto Sans SC', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+
+        .product-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Works Section - 使用图片 */
+        .works {
+            background: var(--bg-deep);
+        }
+
+        .works-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+        }
+
+        .work-card {
+            position: relative;
+            aspect-ratio: 16/10;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .work-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.2), transparent 70%);
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.8s ease;
         }
 
-        .project-card:hover::before {
-            opacity: 1;
+        .work-card:hover .work-bg {
+            transform: scale(1.08);
         }
 
-        .project-card:hover {
-            border-color: rgba(139, 92, 246, 0.3);
-            transform: scale(1.02);
+        .work-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, 0.85) 100%);
         }
 
-        .project-card h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.3rem;
+        .work-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 3rem;
+            transform: translateY(20px);
+            transition: transform 0.5s ease;
+        }
+
+        .work-card:hover .work-content {
+            transform: translateY(0);
+        }
+
+        .work-tag {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .work-card h3 {
+            font-family: 'Syne', 'Noto Sans SC', sans-serif;
+            font-size: 1.8rem;
             font-weight: 500;
             margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 1;
         }
 
-        .project-card p {
-            font-size: 0.85rem;
+        .work-card p {
+            font-size: 0.95rem;
             color: var(--text-secondary);
-            font-weight: 300;
-            position: relative;
-            z-index: 1;
+            line-height: 1.8;
+            max-width: 400px;
         }
 
-        /* Contact Section */
-        .contact {
-            background: linear-gradient(180deg, transparent, rgba(34, 211, 238, 0.02), transparent);
+        /* Team Section */
+        .team {
+            background: linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.02), transparent);
+        }
+
+        .team-content {
+            max-width: 800px;
+            margin: 0 auto;
             text-align: center;
         }
 
-        .contact-email {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.8rem;
+        .team-text {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 2;
+            font-weight: 300;
+        }
+
+        .team-text-en {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
+            font-weight: 200;
+        }
+
+        /* Join Section */
+        .join {
+            background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.05) 50%, transparent);
+            text-align: center;
+        }
+
+        .join-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .join-btn {
+            padding: 1.2rem 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 0.9rem;
             font-weight: 300;
             letter-spacing: 0.2em;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.4s ease;
+        }
+
+        .join-btn:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--accent-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
+        }
+
+        .join-btn.primary {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-color: transparent;
+        }
+
+        .join-btn.primary:hover {
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        .contact-info {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .contact-info p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-email {
+            font-size: 1.1rem;
             color: var(--accent-cyan);
             text-decoration: none;
-            transition: all 0.4s ease;
+            transition: all 0.3s ease;
         }
 
         .contact-email:hover {
             color: var(--accent-purple);
-            text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
         }
 
         /* Footer */
         footer {
-            padding: 2rem 4rem;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 4rem;
+            background: var(--bg-deep);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-logo-img {
+            height: 28px;
+            width: auto;
+        }
+
+        .footer-slogan {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
             font-size: 0.8rem;
             color: var(--text-secondary);
-            font-weight: 300;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(34, 211, 238, 0.1);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
         /* Animations */
@@ -349,32 +1041,82 @@
             }
         }
 
-        @keyframes scrollPulse {
-            0%, 100% { opacity: 0.3; transform: scaleY(1); }
-            50% { opacity: 1; transform: scaleY(1.1); }
-        }
-
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 1100px) {
+            .era-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 900px) {
             .nav {
-                padding: 1.5rem 2rem;
+                padding: 1rem 2rem;
             }
             
             .nav-links {
-                gap: 1.5rem;
+                display: none;
             }
             
-            .nav-links a {
-                font-size: 0.75rem;
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .mobile-nav {
+                display: flex;
             }
             
             section {
-                padding: 4rem 2rem;
+                padding: 6rem 2rem;
             }
             
-            .about-grid,
-            .project-grid {
+            .about-content {
                 grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                justify-content: flex-start;
+                padding-left: 50px;
+                transform: translateX(-30px);
+            }
+            
+            .timeline-item.visible {
+                transform: translateX(0);
+            }
+            
+            .timeline-dot {
+                left: 20px;
+            }
+            
+            .era-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .works-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-slogan-large {
+                font-size: clamp(1.8rem, 5vw, 3rem) !important;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-links {
+                flex-wrap: wrap;
+                justify-content: center;
             }
         }
     </style>
@@ -382,86 +1124,261 @@
 <body>
     <canvas id="particles"></canvas>
 
-    <nav class="nav">
-        <a href="#" class="logo">LINGX</a>
+    <nav class="nav" id="nav">
+        <a href="#" class="logo">
+            <img src="LOGO.svg" alt="LINGX" class="logo-img">
+            <span class="logo-text">LINGX</span>
+        </a>
         <ul class="nav-links">
             <li><a href="#about">关于</a></li>
-            <li><a href="#projects">项目</a></li>
-            <li><a href="#experience">体验</a></li>
-            <li><a href="#contact">联系</a></li>
+            <li><a href="#era">时代</a></li>
+            <li><a href="#products">技术</a></li>
+            <li><a href="#works">作品</a></li>
+            <li><a href="#join">加入</a></li>
         </ul>
+        <div class="mobile-menu-btn" id="mobileMenuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+    
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="#about">关于</a>
+        <a href="#era">时代</a>
+        <a href="#products">技术</a>
+        <a href="#works">作品</a>
+        <a href="#join">加入</a>
     </nav>
 
+    <!-- Hero Section -->
     <section class="hero">
+        <div class="hero-grid"></div>
+        <div class="floating-orb orb1"></div>
+        <div class="floating-orb orb2"></div>
+        <div class="floating-orb orb3"></div>
         <div class="hero-content">
-            <h1 class="slogan">点亮每个人心中的梦境</h1>
+            <div class="hero-logo-container">
+                <div class="hero-logo-glow"></div>
+                <img src="LOGO.svg" alt="LINGX" class="hero-logo">
+            </div>
+            <h1 class="slogan hero-slogan-large">点亮每个人心中的梦境</h1>
             <p class="slogan-en">LIGHT UP YOUR DREAMWORLD</p>
+            <a href="#about" class="cta-button">探索梦境 EXPLORE</a>
         </div>
         <div class="scroll-hint">
             <span>探索</span>
-            <div class="scroll-line"></div>
+            <div class="scroll-arrow"></div>
         </div>
     </section>
 
+    <!-- About Section -->
     <section class="about" id="about">
-        <h2 class="section-title">关于零想</h2>
-        <p class="section-subtitle">我们相信，每个人的心中都有一片未被触达的梦境。</p>
-        <div class="about-grid">
-            <div class="about-card">
-                <h3>AI 驱动</h3>
+        <div class="section-header">
+            <h2 class="section-title">关于我们</h2>
+            <div class="section-line"></div>
+        </div>
+        <div class="about-content">
+            <div class="timeline">
+                <div class="timeline-item" data-delay="0">
+                    <span class="timeline-year">1983</span>
+                    <span class="timeline-label">PC 互联网</span>
+                    <div class="timeline-dot"></div>
+                </div>
+                <div class="timeline-item" data-delay="100">
+                    <span class="timeline-year">1994</span>
+                    <span class="timeline-label">互联网</span>
+                    <div class="timeline-dot"></div>
+                </div>
+                <div class="timeline-item" data-delay="200">
+                    <span class="timeline-year">2007</span>
+                    <span class="timeline-label">移动互联网</span>
+                    <div class="timeline-dot"></div>
+                </div>
+                <div class="timeline-item" data-delay="300">
+                    <span class="timeline-year">2022</span>
+                    <span class="timeline-label">空间计算</span>
+                    <div class="timeline-dot"></div>
+                </div>
+            </div>
+            <div class="about-story">
+                <h3>零想科技 LINGX DreamWorks</h3>
+                <p>零想是一家以AI驱动的XR沉浸式社交娱乐梦工场。我们相信，AGI时代人类最珍贵的将会是真实与情感链接。</p>
+                <p class="en">LINGX is an AI-driven XR immersive social entertainment dream factory. We believe that in the AGI era, what matters most will be authentic emotional connections.</p>
+                <p>我们通过AI+XR创造多重现实的沉浸体验，让人在多维空间中自由创造、社交、娱乐，体验生命的多姿多彩。</p>
+                <div class="quote-card">
+                    <p class="quote-text">"最终，一切取决于品味。"</p>
+                    <p class="quote-author">— Steve Jobs</p>
+                    <p class="quote-desc">空间美学是一种天赋，更是一群设计师二十年的积累与追求。当今技术已没有任何门槛，但有一群拥有空间美学与审美力的团队，是别人无法比拟和学会的。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Era Section -->
+    <section class="era" id="era">
+        <div class="section-header">
+            <h2 class="section-title">时代浪潮</h2>
+            <p class="section-subtitle">THE GREAT WAVE</p>
+            <div class="section-line"></div>
+        </div>
+        <div class="era-grid">
+            <div class="era-card">
+                <div class="era-icon">💻</div>
+                <div class="era-year">1983</div>
+                <div class="era-name">PC 互联网</div>
+                <div class="era-name-en">PC Internet</div>
+                <p class="era-desc">个人电脑的普及让人们第一次连接到虚拟世界，信息传递突破了物理边界。</p>
+            </div>
+            <div class="era-card">
+                <div class="era-icon">🌐</div>
+                <div class="era-year">1994</div>
+                <div class="era-name">互联网</div>
+                <div class="era-name-en">The Internet</div>
+                <p class="era-desc">浏览器的发明让互联网走向大众，万维网将全球信息连接成一个整体。</p>
+            </div>
+            <div class="era-card">
+                <div class="era-icon">📱</div>
+                <div class="era-year">2007</div>
+                <div class="era-name">移动互联网</div>
+                <div class="era-name-en">Mobile Internet</div>
+                <p class="era-desc">智能手机将互联网装入口袋，人与人的连接变得随时随地，社会结构被重塑。</p>
+            </div>
+            <div class="era-card">
+                <div class="era-icon">🥽</div>
+                <div class="era-year">2022</div>
+                <div class="era-name">空间计算</div>
+                <div class="era-name-en">Spatial Computing</div>
+                <p class="era-desc">空间计算时代，人成为场景的一部分，在多维空间中创造、社交、娱乐，生命的可能性被无限拓展。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="section-header">
+            <h2 class="section-title">我们构建梦境</h2>
+            <p class="section-subtitle">WE BUILD DREAMS</p>
+            <div class="section-line"></div>
+        </div>
+        <div class="products-grid">
+            <div class="product-card">
+                <div class="product-icon">🎭</div>
+                <h4>AI 驱动</h4>
                 <p>以人工智能为核心引擎，结合深度学习与生成式AI，为用户创造个性化的沉浸式体验。</p>
             </div>
-            <div class="about-card">
-                <h3>XR 沉浸</h3>
+            <div class="product-card">
+                <div class="product-icon">🌐</div>
+                <h4>XR 沉浸</h4>
                 <p>融合VR/AR/MR技术，打破现实与虚拟的边界，让用户体验前所未有的感官盛宴。</p>
             </div>
-            <div class="about-card">
-                <h3>社交娱乐</h3>
+            <div class="product-card">
+                <div class="product-icon">💫</div>
+                <h4>社交娱乐</h4>
                 <p>打造下一代社交娱乐平台，让人们在虚拟世界中建立真实的情感连接。</p>
             </div>
         </div>
     </section>
 
-    <section class="projects" id="projects">
-        <h2代表作品 class="section-title">代表作品</h2>
-        <p class="section-subtitle">用技术诠释想象，用产品讲述故事。</p>
-        <div class="project-grid">
-            <div class="project-card">
-                <h3>DREAM SPACE</h3>
-                <p>AI生成的沉浸式虚拟空间，让每个人都能创建自己的梦境世界。</p>
+    <!-- Works Section -->
+    <section class="works" id="works">
+        <div class="section-header">
+            <h2 class="section-title">梦境作品</h2>
+            <p class="section-subtitle">OUR WORKS</p>
+            <div class="section-line"></div>
+        </div>
+        <div class="works-grid">
+            <div class="work-card">
+                <div class="work-bg" style="background-image: url('images/ppt/media/image28.png');"></div>
+                <div class="work-overlay"></div>
+                <div class="work-content">
+                    <span class="work-tag">文旅IP · XR大空间 · 神话叙事</span>
+                    <h3>《寻剑》</h3>
+                    <p>零想联合德清文旅打造的全国首个古镇神话主题IP。串联莫干山、下渚湖、新市古镇三大名片，展现干将莫邪神话传说场景。戴上眼镜即可穿越千年。</p>
+                </div>
             </div>
-            <div class="project-card">
-                <h3>NEURAL LINK</h3>
-                <p>下一代社交接口，用脑波交互重新定义虚拟社交体验。</p>
-            </div>
-            <div class="project-card">
-                <h3>QUANTUM CHAT</h3>
-                <p>基于量子计算的多维即时通讯系统，开启通讯新纪元。</p>
-            </div>
-            <div class="project-card">
-                <h3>HOLOGRAM</h3>
-                <p>全息投影技术方案，为现实世界注入科幻色彩。</p>
+            <div class="work-card">
+                <div class="work-bg" style="background-image: url('images/ppt/media/image55.png');"></div>
+                <div class="work-overlay"></div>
+                <div class="work-content">
+                    <span class="work-tag">消失的文明系列 · XR大空间 · 全球首创</span>
+                    <h3>《奇幻巴比伦》</h3>
+                    <p>全球首个巴比伦文明XR沉浸式探索体验。在虚拟世界中重现空中花园、伊什塔尔门与巴别塔的奇观——这不仅是技术的展示，更是一次跨越两千多年的文明对话。</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <section class="contact" id="contact">
-        <h2 class="section-title">联系我们</h2>
-        <p class="section-subtitle">一起探索梦境的边界。</p>
-        <a href="mailto:hello@lingx.ai" class="contact-email">hello@lingx.ai</a>
+    <!-- Team Section -->
+    <section class="team" id="team">
+        <div class="section-header">
+            <h2 class="section-title">造梦人</h2>
+            <p class="section-subtitle">THE DREAMMAKERS</p>
+            <div class="section-line"></div>
+        </div>
+        <div class="team-content">
+            <p class="team-text">
+                我们是一群充满热爱、敢于创新实践的优秀设计师。创始团队拥有20年文旅项目经验，在空间美学和沉浸体验上积累了深厚根基。为每个人造梦是设计师的天职，空间计算时代为我们提供了无限创意的可能。
+            </p>
+            <p class="team-text-en">
+                We are a group of passionate designers daring to innovate. With 20 years of cultural tourism experience, our founding team has deep roots in spatial aesthetics and immersive experiences. Creating dreams for everyone is a designer's calling, and the spatial computing era provides us with infinite possibilities.
+            </p>
+        </div>
     </section>
 
+    <!-- Join Section -->
+    <section class="join" id="join">
+        <div class="section-header">
+            <h2 class="section-title">共赴新境</h2>
+            <p class="section-subtitle">JOURNEY WITH US</p>
+            <p style="margin-top: 2rem; color: var(--text-secondary); max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.8;">
+                我们寻找能够一起改变未来的同行者。这不仅是一次合作，更是定义下一代沉浸式社交娱乐的共创之旅。大道之上，共赴新境。
+            </p>
+            <div class="section-line"></div>
+        </div>
+        <div class="join-buttons">
+            <a href="mailto:CL@offthink.com?subject=商务合作咨询" class="join-btn primary">商务合作 Business</a>
+            <a href="mailto:CL@offthink.com?subject=投资方咨询" class="join-btn">了解融资 Investor</a>
+        </div>
+        <div class="contact-info">
+            <p>上海市浦东新区金桥路535号EKA天物28幢</p>
+            <a href="mailto:CL@offthink.com" class="contact-email">CL@offthink.com</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer>
-        <p>© 2022-2026 LINGX DreamWorks. All rights reserved.</p>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="LOGO.svg" alt="LINGX" class="footer-logo-img">
+                <span class="footer-slogan">点亮每个人心中的梦境</span>
+            </div>
+            <div class="footer-links">
+                <a href="#about">关于</a>
+                <a href="#works">案例</a>
+                <a href="#team">团队</a>
+                <a href="#join">联系</a>
+            </div>
+            <div class="footer-social">
+                <a href="#" class="social-icon" title="微信">微</a>
+                <a href="#" class="social-icon" title="微博">博</a>
+                <a href="#" class="social-icon" title="LinkedIn">in</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 上海零想科技有限公司 / Shanghai LINGX Technology Co., Ltd.
+        </div>
     </footer>
 
     <script>
-        // Particle System
+        // 增强粒子系统 - 科技感
         const canvas = document.getElementById('particles');
         const ctx = canvas.getContext('2d');
         
         let particles = [];
-        const particleCount = 120;
+        const particleCount = 80;
+        let mouseX = 0, mouseY = 0;
         
         function resize() {
             canvas.width = window.innerWidth;
@@ -474,70 +1391,72 @@
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.5,
-                    vy: (Math.random() - 0.5) * 0.5,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
                     size: Math.random() * 2 + 0.5,
-                    alpha: Math.random() * 0.5 + 0.1,
-                    hue: Math.random() > 0.5 ? 270 : 200 + Math.random() * 60
+                    alpha: Math.random() * 0.4 + 0.1,
+                    hue: 240 + Math.random() * 80,
+                    baseHue: 240 + Math.random() * 80
                 });
             }
         }
         
+        // 鼠标交互
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
         function drawParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // 绘制粒子
             particles.forEach((p, i) => {
-                // Update position
+                // 鼠标交互
+                const dx = mouseX - p.x;
+                const dy = mouseY - p.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    p.hue = p.baseHue + 60; // 鼠标靠近变色
+                } else {
+                    p.hue = p.baseHue;
+                }
+                
                 p.x += p.vx;
                 p.y += p.vy;
                 
-                // Wrap around edges
                 if (p.x < 0) p.x = canvas.width;
                 if (p.x > canvas.width) p.x = 0;
                 if (p.y < 0) p.y = canvas.height;
                 if (p.y > canvas.height) p.y = 0;
                 
-                // Draw glow
-                const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
-                gradient.addColorStop(0, `hsla(${p.hue}, 80%, 70%, ${p.alpha})`);
-                gradient.addColorStop(0.5, `hsla(${p.hue}, 70%, 50%, ${p.alpha * 0.3})`);
-                gradient.addColorStop(1, 'transparent');
-                
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                
-                // Draw core
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${p.hue}, 90%, 80%, ${p.alpha + 0.3})`;
+                ctx.fillStyle = `hsla(${p.hue}, 70%, 70%, ${p.alpha})`;
                 ctx.fill();
             });
             
-            // Draw connections
-            particles.forEach((p1, i) => {
-                particles.slice(i + 1).forEach(p2 => {
-                    const dx = p1.x - p2.x;
-                    const dy = p1.y - p2.y;
+            // 绘制粒子连线
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (dist < 150) {
-                        const alpha = (1 - dist / 150) * 0.15;
+                    if (dist < 120) {
                         ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `hsla(260, 70%, 60%, ${alpha})`;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `hsla(260, 70%, 60%, ${0.15 * (1 - dist / 120)})`;
                         ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
-                });
-            });
+                }
+            }
             
             requestAnimationFrame(drawParticles);
         }
         
-        // Initialize
         window.addEventListener('resize', () => {
             resize();
             createParticles();
@@ -546,6 +1465,54 @@
         resize();
         createParticles();
         drawParticles();
+        
+        // Navigation scroll effect - 滚动后显示导航条
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('visible', 'scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+                // 保持隐藏，直到滚动超过50px
+            }
+        });
+        
+        // Mobile menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            mobileNav.classList.toggle('active');
+        });
+        
+        document.querySelectorAll('.mobile-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuBtn.classList.remove('active');
+                mobileNav.classList.remove('active');
+            });
+        });
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const timelineObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const delay = entry.target.getAttribute('data-delay') || 0;
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, delay);
+                }
+            });
+        }, observerOptions);
+        
+        timelineItems.forEach(item => {
+            timelineObserver.observe(item);
+        });
         
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
