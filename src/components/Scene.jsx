@@ -1,18 +1,41 @@
 /**
- * [WHO]: Three.js 3D场景容器
- * [FROM]: 依赖 @react-three/fiber, @react-three/drei, LogoParticles组件
- * [TO]: 渲染整个3D场景到Canvas
+ * [WHO]: Three.js 场景容器
+ * [FROM]: 依赖 @react-three/fiber, LogoParticles, StarField
+ * [TO]: 渲染整个3D场景
  * [HERE]: src/components/Scene.jsx - 3D场景根组件
  */
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
 import LogoParticles from './LogoParticles'
-import WorldFlow from './WorldFlow'
+import StarField from './StarField'
+import { useStage, STAGES } from '../store/useStage'
+
+function SceneContent() {
+  const { currentStage, entranceComplete, stageVisible } = useStage()
+  
+  return (
+    <>
+      <color attach="background" args={['#050A18']} />
+      
+      {/* 背景星空 */}
+      <StarField />
+      
+      {/* Entrance阶段显示Logo粒子 */}
+      {stageVisible[STAGES.ENTRANCE] && (
+        <LogoParticles />
+      )}
+      
+      {/* 简单的环境光 */}
+      <ambientLight intensity={0.2} />
+    </>
+  )
+}
 
 export default function Scene() {
+  const { currentStage } = useStage()
+  
   return (
     <Canvas
-      camera={{ position: [0, 0, 5], fov: 50 }}
+      camera={{ position: [0, 0, 4], fov: 45 }}
       gl={{ 
         antialias: true, 
         alpha: true,
@@ -24,26 +47,11 @@ export default function Scene() {
         left: 0, 
         width: '100%', 
         height: '100%',
-        zIndex: 1
+        zIndex: 1,
+        pointerEvents: 'none'
       }}
     >
-      <color attach="background" args={['#050A18']} />
-      
-      {/* 环境光 */}
-      <ambientLight intensity={0.3} />
-      
-      {/* 核心：粒子Logo动画系统 */}
-      <LogoParticles />
-      
-      {/* 背景：缓慢流动的空间 */}
-      <WorldFlow />
-      
-      {/* 相机控制（禁用缩放） */}
-      <OrbitControls 
-        enableZoom={false} 
-        enablePan={false}
-        enableRotate={false}
-      />
+      <SceneContent />
     </Canvas>
   )
 }

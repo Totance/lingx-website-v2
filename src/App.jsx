@@ -1,133 +1,256 @@
 /**
- * [WHO]: 主应用组件，管理整个网站的阶段切换
- * [FROM]: 依赖 Scene 组件、useStage store
- * [TO]: 管理整个界面的渲染和交互
+ * [WHO]: 主应用 - 5状态沉浸式体验
+ * [FROM]: 依赖 Scene、useStage、GSAP
+ * [TO]: 管理整个网站的渲染和交互
  * [HERE]: src/App.jsx - 应用核心
  */
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import Scene from './components/Scene'
-import { useStage } from './store/useStage'
+import { useStage, STAGES } from './store/useStage'
+
+// 各阶段的文案配置
+const STAGE_CONTENT = {
+  [STAGES.ENTRANCE]: {
+    title: '',
+    subtitle: ''
+  },
+  [STAGES.STATEMENT]: {
+    title: '我们用AI和XR',
+    subtitle: '创造可以进入的世界'
+  },
+  [STAGES.VISION]: {
+    title: '点亮每个人心中的梦境',
+    subtitle: 'LIGHT UP YOUR DREAMWORLD'
+  },
+  [STAGES.WORKS]: {
+    projects: [
+      { name: '寻剑', desc: '进入一段神话' },
+      { name: '奇幻巴比伦', desc: '让消失的文明再次被看见' }
+    ]
+  },
+  [STAGES.CONTACT]: {
+    title: 'LINGX',
+    email: 'CL@offthink.com'
+  }
+}
+
+function ScrollHint({ visible, onClick }) {
+  return (
+    <div 
+      className={`scroll-hint ${visible ? 'visible' : ''}`}
+      onClick={onClick}
+    >
+      <div className="scroll-mouse">
+        <div className="scroll-wheel"></div>
+      </div>
+      <span className="scroll-text">向下探索</span>
+    </div>
+  )
+}
+
+function StageContent({ stage, visible }) {
+  const content = STAGE_CONTENT[stage]
+  const itemRef = useRef(null)
+  
+  useEffect(() => {
+    if (visible && itemRef.current) {
+      gsap.fromTo(itemRef.current.children, 
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 1.2, stagger: 0.1, ease: 'power2.out' }
+      )
+    }
+  }, [visible])
+  
+  if (!visible) return null
+  
+  switch (stage) {
+    case STAGES.STATEMENT:
+      return (
+        <div className="stage-content statement" ref={itemRef}>
+          <h1 className="main-title">{content.title}</h1>
+          <p className="sub-title">{content.subtitle}</p>
+        </div>
+      )
+      
+    case STAGES.VISION:
+      return (
+        <div className="stage-content vision" ref={itemRef}>
+          <h1 className="main-title">{content.title}</h1>
+          <p className="sub-title en">{content.subtitle}</p>
+        </div>
+      )
+      
+    case STAGES.WORKS:
+      return (
+        <div className="stage-content works" ref={itemRef}>
+          <div className="projects-grid">
+            {content.projects.map((project, i) => (
+              <div key={i} className="project-card">
+                <div className="project-name">{project.name}</div>
+                <div className="project-desc">{project.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+      
+    case STAGES.CONTACT:
+      return (
+        <div className="stage-content contact" ref={itemRef}>
+          <div className="contact-logo">{content.title}</div>
+          <a href={`mailto:${content.email}`} className="contact-email">
+            {content.email}
+          </a>
+        </div>
+      )
+      
+    default:
+      return null
+  }
+}
 
 export default function App() {
-  const { stage, setStage } = useStage()
-  const [showScrollHint, setShowScrollHint] = useState(false)
-  const [sloganVisible, setSloganVisible] = useState(false)
-  const [projectsVisible, setProjectsVisible] = useState(false)
-  const [showEnd, setShowEnd] = useState(false)
+  const { 
+    currentStage, 
+    setCurrentStage, 
+    entranceComplete,
+    readyToScroll,
+    setStageVisible,
+    stageVisible
+  } = useStage()
   
-  // 自动播放逻辑：粒子Logo完成后显示滚动提示
+  const [canScroll, setCanScroll] = useState(false)
+  const containerRef = useRef(null)
+  
+  // Entrance完成后允许滚动
   useEffect(() => {
-    const timer1 = setTimeout(() => {
-      setShowScrollHint(true)
-    }, 3000)
-    
-    // 滚动到第二屏时显示slogan
-    const handleScroll = () => {
-      const scrollY = window.scrollY
+    if (entranceComplete) {
+      setTimeout(() => setCanScroll(true), 500)
+    }
+  }, [entranceComplete])
+  
+  // 滚动处理
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (!canScroll || !entranceComplete) return
+      
+      const delta = e.deltaY
       const windowHeight = window.innerHeight
       
-      if (scrollY > windowHeight * 0.5 && !sloganVisible) {
-        setSloganVisible(true)
-      }
-      
-      if (scrollY > windowHeight * 1.5 && !projectsVisible) {
-        setProjectsVisible(true)
-      }
-      
-      if (scrollY > windowHeight * 2.5 && !showEnd) {
-        setShowEnd(true)
+      if (delta > 0 && currentStage < 4) {
+        // 向下滚动
+        const nextStage = currentStage + 1
+        setStageVisible(currentStage, true)
+        setCurrentStage(nextStage)
+        setStageVisible(nextStage, true)
+        
+        // 滚动到对应位置
+        window.scrollTo({
+          top: nextStage * windowHeight,
+          behavior: 'smooth'
+        })
+      } else if (delta < 0 && currentStage > 0) {
+        // 向上滚动
+        const prevStage = currentStage - 1
+        setCurrentStage(prevStage)
+        
+        window.scrollTo({
+          top: prevStage * windowHeight,
+          behavior: 'smooth'
+        })
       }
     }
     
-    window.addEventListener('scroll', handleScroll)
-    return () => {
-      clearTimeout(timer1)
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [sloganVisible, projectsVisible, showEnd])
+    window.addEventListener('wheel', handleWheel, { passive: true })
+    return () => window.removeEventListener('wheel', handleWheel)
+  }, [currentStage, canScroll, entranceComplete, setCurrentStage, setStageVisible])
   
-  const handleScroll = useCallback(() => {
-    window.scrollTo({
-      top: window.innerHeight,
-      behavior: 'smooth'
-    })
-  }, [])
+  // 键盘导航
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (!canScroll || !entranceComplete) return
+      
+      if (e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault()
+        if (currentStage < 4) {
+          const nextStage = currentStage + 1
+          setStageVisible(nextStage, true)
+          setCurrentStage(nextStage)
+          window.scrollTo({
+            top: nextStage * window.innerHeight,
+            behavior: 'smooth'
+          })
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        if (currentStage > 0) {
+          const prevStage = currentStage - 1
+          setCurrentStage(prevStage)
+          window.scrollTo({
+            top: prevStage * window.innerHeight,
+            behavior: 'smooth'
+          })
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [currentStage, canScroll, entranceComplete, setCurrentStage, setStageVisible])
+  
+  const handleScrollClick = () => {
+    if (canScroll && entranceComplete) {
+      setStageVisible(1, true)
+      setCurrentStage(1)
+      window.scrollTo({
+        top: window.innerHeight,
+        behavior: 'smooth'
+      })
+    }
+  }
   
   return (
-    <div className="app">
+    <div className="app" ref={containerRef}>
       {/* 3D场景 - 全屏 */}
       <div className="scene-container">
         <Scene />
       </div>
       
-      {/* 第一屏：Logo + 滚动提示 */}
-      <section className="screen screen-1">
-        <div className="content">
-          {/* 3D场景已经有粒子Logo，这里只需空白，让用户"看" */}
-        </div>
+      {/* 5个全屏阶段 */}
+      <div className="stages-container">
+        {/* Stage 0: Entrance - 只有粒子Logo */}
+        <section className={`stage stage-0 ${stageVisible[0] ? 'visible' : ''}`}>
+          {!entranceComplete && (
+            <div className="loading-indicator">
+              <span className="loading-dot"></span>
+              <span className="loading-dot"></span>
+              <span className="loading-dot"></span>
+            </div>
+          )}
+          <ScrollHint visible={entranceComplete} onClick={handleScrollClick} />
+        </section>
         
-        {/* 滚动提示 - 只有粒子聚合后才显示 */}
-        {showScrollHint && (
-          <div 
-            className={`scroll-hint ${showScrollHint ? 'visible' : ''}`}
-            onClick={handleScroll}
-          >
-            <span className="scroll-arrow">↓</span>
-          </div>
-        )}
-      </section>
-      
-      {/* 第二屏：一句话定义 */}
-      <section className={`screen screen-2 ${sloganVisible ? 'visible' : ''}`}>
-        <div className="slogan-container">
-          <h1 className="slogan">
-            {sloganVisible && (
-              <>
-                <span className="word">我</span>
-                <span className="word">们</span>
-                <span className="word">用</span>
-                <span className="word">A</span>
-                <span className="word">I</span>
-                <span className="word">和</span>
-                <span className="word">X</span>
-                <span className="word">R</span>
-                <br/>
-                <span className="word">创</span>
-                <span class="word">造</span>
-                <span class="word">可</span>
-                <span class="word">以</span>
-                <span class="word">进</span>
-                <span class="word">入</span>
-                <span class="word">的</span>
-                <span class="word">世</span>
-                <span class="word">界</span>
-              </>
-            )}
-          </h1>
-        </div>
-      </section>
-      
-      {/* 第三屏：作品展示 */}
-      <section className={`screen screen-3 ${projectsVisible ? 'visible' : ''}`}>
-        <div className="projects">
-          <div className="project project-1">
-            <div className="project-name">寻剑</div>
-            <div className="project-desc">进入一段神话</div>
-          </div>
-          <div className="project project-2">
-            <div className="project-name">奇幻巴比伦</div>
-            <div className="project-desc">让消失的文明再次被看见</div>
-          </div>
-        </div>
-      </section>
-      
-      {/* 第四屏：结束 */}
-      <section className={`screen screen-4 ${showEnd ? 'visible' : ''}`}>
-        <div className="end">
-          <div className="end-logo">LINGX</div>
-          <div className="end-email">CL@offthink.com</div>
-        </div>
-      </section>
+        {/* Stage 1: Statement */}
+        <section className={`stage stage-1 ${stageVisible[1] ? 'visible' : ''}`}>
+          <StageContent stage={STAGES.STATEMENT} visible={stageVisible[1]} />
+        </section>
+        
+        {/* Stage 2: Vision */}
+        <section className={`stage stage-2 ${stageVisible[2] ? 'visible' : ''}`}>
+          <StageContent stage={STAGES.VISION} visible={stageVisible[2]} />
+        </section>
+        
+        {/* Stage 3: Works */}
+        <section className={`stage stage-3 ${stageVisible[3] ? 'visible' : ''}`}>
+          <StageContent stage={STAGES.WORKS} visible={stageVisible[3]} />
+        </section>
+        
+        {/* Stage 4: Contact */}
+        <section className={`stage stage-4 ${stageVisible[4] ? 'visible' : ''}`}>
+          <StageContent stage={STAGES.CONTACT} visible={stageVisible[4]} />
+        </section>
+      </div>
     </div>
   )
 }
