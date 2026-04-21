@@ -28,7 +28,8 @@ body {
 .app {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* 3D场景容器 */
@@ -36,15 +37,19 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   z-index: 1;
+  pointer-events: none;
 }
 
-/* 阶段容器 */
+/* 阶段容器 - 启用滚动和吸附 */
 .stages-container {
   position: relative;
   z-index: 10;
+  height: 500vh; /* 5个阶段 x 100vh */
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
 }
 
 /* ============ 全屏阶段基础样式 ============ */
@@ -58,6 +63,8 @@ body {
   opacity: 0;
   transition: opacity 0.8s ease;
   pointer-events: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .stage.visible {
@@ -70,6 +77,7 @@ body {
   position: fixed;
   top: 0;
   left: 0;
+  pointer-events: none; /* 始终允许点击穿透 */
 }
 
 /* 加载指示器 */
@@ -122,6 +130,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  pointer-events: auto; /* 确保可以点击 */
 }
 
 .scroll-hint.visible {

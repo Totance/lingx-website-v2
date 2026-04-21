@@ -122,6 +122,7 @@ export default function App() {
   
   const [canScroll, setCanScroll] = useState(false)
   const containerRef = useRef(null)
+  const isScrolling = useRef(false)
   
   // Entrance完成后允许滚动
   useEffect(() => {
@@ -130,35 +131,66 @@ export default function App() {
     }
   }, [entranceComplete])
   
+  // 监听滚动容器来更新阶段
+  useEffect(() => {
+    if (!containerRef.current) return
+    
+    const handleScroll = () => {
+      if (!canScroll || !entranceComplete || isScrolling.current) return
+      
+      const container = containerRef.current
+      const scrollTop = container.scrollTop
+      const windowHeight = window.innerHeight
+      const newStage = Math.round(scrollTop / windowHeight)
+      
+      if (newStage !== useStage.getState().currentStage && newStage >= 0 && newStage <= 4) {
+        useStage.getState().setCurrentStage(newStage)
+        useStage.getState().setStageVisible(newStage, true)
+      }
+    }
+    
+    const container = containerRef.current
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [canScroll, entranceComplete])
+  
   // 滚动处理
   useEffect(() => {
     const handleWheel = (e) => {
-      if (!canScroll || !entranceComplete) return
+      if (!canScroll || !entranceComplete || isScrolling.current) return
       
       const delta = e.deltaY
       const windowHeight = window.innerHeight
+      const container = containerRef.current
+      const currentScroll = container.scrollTop
+      const currentStageLocal = Math.round(currentScroll / windowHeight)
       
-      if (delta > 0 && currentStage < 4) {
-        // 向下滚动
-        const nextStage = currentStage + 1
-        setStageVisible(currentStage, true)
-        setCurrentStage(nextStage)
+      if (delta > 0 && currentStageLocal < 4) {
+        // 向下滚动 - 下一阶段
+        isScrolling.current = true
+        const nextStage = currentStageLocal + 1
         setStageVisible(nextStage, true)
+        setCurrentStage(nextStage)
         
-        // 滚动到对应位置
-        window.scrollTo({
+        container.scrollTo({
           top: nextStage * windowHeight,
           behavior: 'smooth'
         })
-      } else if (delta < 0 && currentStage > 0) {
-        // 向上滚动
-        const prevStage = currentStage - 1
-        setCurrentStage(prevStage)
         
-        window.scrollTo({
+        setTimeout(() => { isScrolling.current = false }, 800)
+      } else if (delta < 0 && currentStageLocal > 0) {
+        // 向上滚动 - 上一阶段
+        isScrolling.current = true
+        const prevStage = currentStageLocal - 1
+        setCurrentStage(prevStage)
+        setStageVisible(prevStage, true)
+        
+        container.scrollTo({
           top: prevStage * windowHeight,
           behavior: 'smooth'
         })
+        
+        setTimeout(() => { isScrolling.current = false }, 800)
       }
     }
     
@@ -174,23 +206,28 @@ export default function App() {
       if (e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault()
         if (currentStage < 4) {
+          isScrolling.current = true
           const nextStage = currentStage + 1
           setStageVisible(nextStage, true)
           setCurrentStage(nextStage)
-          window.scrollTo({
+          containerRef.current.scrollTo({
             top: nextStage * window.innerHeight,
             behavior: 'smooth'
           })
+          setTimeout(() => { isScrolling.current = false }, 800)
         }
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
         if (currentStage > 0) {
+          isScrolling.current = true
           const prevStage = currentStage - 1
           setCurrentStage(prevStage)
-          window.scrollTo({
+          setStageVisible(prevStage, true)
+          containerRef.current.scrollTo({
             top: prevStage * window.innerHeight,
             behavior: 'smooth'
           })
+          setTimeout(() => { isScrolling.current = false }, 800)
         }
       }
     }
@@ -213,24 +250,33 @@ export default function App() {
       touchEndY = e.changedTouches[0].clientY
       const diff = touchStartY - touchEndY
       const threshold = 50
+      const container = containerRef.current
+      const windowHeight = window.innerHeight
+      const currentScroll = container.scrollTop
+      const currentStageLocal = Math.round(currentScroll / windowHeight)
       
-      if (diff > threshold && currentStage < 4) {
+      if (diff > threshold && currentStageLocal < 4) {
         // 向上滑动 - 下一阶段
-        const nextStage = currentStage + 1
+        isScrolling.current = true
+        const nextStage = currentStageLocal + 1
         setStageVisible(nextStage, true)
         setCurrentStage(nextStage)
-        window.scrollTo({
-          top: nextStage * window.innerHeight,
+        container.scrollTo({
+          top: nextStage * windowHeight,
           behavior: 'smooth'
         })
-      } else if (diff < -threshold && currentStage > 0) {
+        setTimeout(() => { isScrolling.current = false }, 800)
+      } else if (diff < -threshold && currentStageLocal > 0) {
         // 向下滑动 - 上一阶段
-        const prevStage = currentStage - 1
+        isScrolling.current = true
+        const prevStage = currentStageLocal - 1
         setCurrentStage(prevStage)
-        window.scrollTo({
-          top: prevStage * window.innerHeight,
+        setStageVisible(prevStage, true)
+        container.scrollTo({
+          top: prevStage * windowHeight,
           behavior: 'smooth'
         })
+        setTimeout(() => { isScrolling.current = false }, 800)
       }
     }
     
@@ -244,12 +290,14 @@ export default function App() {
   
   const handleScrollClick = () => {
     if (canScroll && entranceComplete) {
+      isScrolling.current = true
       setStageVisible(1, true)
       setCurrentStage(1)
-      window.scrollTo({
+      containerRef.current.scrollTo({
         top: window.innerHeight,
         behavior: 'smooth'
       })
+      setTimeout(() => { isScrolling.current = false }, 800)
     }
   }
   

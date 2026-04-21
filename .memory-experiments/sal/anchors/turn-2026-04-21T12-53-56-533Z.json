@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-04-21T12:53:56.533Z",
+  "workspaceRoot": "/home/tance/.openclaw/workspace/lingx-website",
+  "weightsSource": "default",
+  "prompt": "bypassPermissions",
+  "taskCandidates": [],
+  "taskUnresolved": [
+    "no terrain node matched prompt signals"
+  ],
+  "actionAnchor": {
+    "workspaceId": "default",
+    "filePath": "package.js",
+    "confidence": 1,
+    "source": [
+      "tool"
+    ]
+  },
+  "actionCandidates": [
+    {
+      "anchor": {
+        "workspaceId": "default",
+        "filePath": "package.js",
+        "confidence": 1,
+        "source": [
+          "tool"
+        ]
+      },
+      "score": 1,
+      "reasons": [
+        "tool touched 1 file(s) in this module",
+        "  - package.js"
+      ]
+    }
+  ],
+  "touchedFiles": [
+    "package.js"
+  ]
+}
