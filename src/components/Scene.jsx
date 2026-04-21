@@ -35,7 +35,7 @@ export default function Scene() {
   
   return (
     <Canvas
-      camera={{ position: [0, 0, 4], fov: 45 }}
+      camera={{ position: [0, 0, 2], fov: 75, near: 0.1, far: 100 }}
       gl={{ 
         antialias: true, 
         alpha: true,
@@ -45,10 +45,16 @@ export default function Scene() {
         position: 'fixed', 
         top: 0, 
         left: 0, 
-        width: '100%', 
-        height: '100%',
+        width: '100vw', 
+        height: '100vh',
         zIndex: 1,
         pointerEvents: 'none'
+      }}
+      onCreated={({ gl, camera }) => {
+        console.log('Three.js Canvas 已创建');
+        console.log('相机位置:', camera.position);
+        console.log('相机FOV:', camera.fov);
+        console.log('渲染器尺寸:', gl.domElement.width, 'x', gl.domElement.height);
       }}
     >
       <SceneContent />
