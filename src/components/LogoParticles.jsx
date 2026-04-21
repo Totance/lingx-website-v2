@@ -14,7 +14,7 @@ const LOGO_POINTS = []
 // 手动构建LINGX文字的粒子点
 const buildLogoPoints = () => {
   const points = []
-  const scale = 0.15 // 增大Logo尺寸，从0.08调整到0.15
+  const scale = 2.5 // Logo尺寸，适配屏幕
   
   // L - 左侧大L
   for (let i = 0; i < 40; i++) points.push(-2.8 + Math.random() * 0.3, 0.8 + Math.random() * 0.1, 0) // 上横
