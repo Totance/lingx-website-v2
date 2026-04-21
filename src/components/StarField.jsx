@@ -47,8 +47,9 @@ void main() {
 export default function StarField() {
   const pointsRef = useRef()
   
+  // 优化：减少星空粒子从2000到800
   const { geometry, material } = useMemo(() => {
-    const count = 2000
+    const count = 800
     const positions = new Float32Array(count * 3)
     
     for (let i = 0; i < count; i++) {

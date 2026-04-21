@@ -1,9 +1,10 @@
 /**
  * [WHO]: Three.js 场景容器
- * [FROM]: 依赖 @react-three/fiber, LogoParticles, StarField
+ * [FROM]: 依赖 @react-three/fiber, THREE, LogoParticles, StarField
  * [TO]: 渲染整个3D场景
  * [HERE]: src/components/Scene.jsx - 3D场景根组件
  */
+import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
 import LogoParticles from './LogoParticles'
 import StarField from './StarField'
@@ -35,7 +36,7 @@ export default function Scene() {
   
   return (
     <Canvas
-      camera={{ position: [0, 0, 2], fov: 75, near: 0.1, far: 100 }}
+      camera={{ position: [0, 0, 1.2], fov: 85, near: 0.1, far: 100 }}
       gl={{ 
         antialias: true, 
         alpha: true,
@@ -50,11 +51,8 @@ export default function Scene() {
         zIndex: 1,
         pointerEvents: 'none'
       }}
-      onCreated={({ gl, camera }) => {
-        console.log('Three.js Canvas 已创建');
-        console.log('相机位置:', camera.position);
-        console.log('相机FOV:', camera.fov);
-        console.log('渲染器尺寸:', gl.domElement.width, 'x', gl.domElement.height);
+      onCreated={({ gl }) => {
+        gl.setClearColor(0x050A18)
       }}
     >
       <SceneContent />

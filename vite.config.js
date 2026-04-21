@@ -6,6 +6,6 @@ export default defineConfig({
   assetsInclude: ['**/*.glsl', '**/*.svg'],
   base: '/lingx-website-v2/',
   build: {
-    outDir: 'docs',
-  },
+    outDir: 'docs'
+  }
 })

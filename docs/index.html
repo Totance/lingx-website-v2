@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/lingx-website-v2/LOGO.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LINGX | 零想 - 调试版</title>
+    <title>LINGX | 零想</title>
     <style>
       * {
         margin: 0;
@@ -17,190 +17,11 @@
         overflow: hidden;
         background: #050A18;
       }
-      
-      /* 调试覆盖层 */
-      .debug-overlay {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        background: rgba(0, 0, 0, 0.85);
-        color: #0f0;
-        padding: 12px;
-        font-family: 'Courier New', monospace;
-        font-size: 13px;
-        z-index: 9999;
-        border-radius: 6px;
-        pointer-events: none;
-        max-width: 350px;
-        border: 1px solid #0f0;
-        box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-      }
-      .debug-overlay h3 {
-        margin: 0 0 8px 0;
-        color: #fff;
-        font-size: 14px;
-        border-bottom: 1px solid #0f0;
-        padding-bottom: 5px;
-      }
-      .debug-overlay div {
-        margin: 4px 0;
-        line-height: 1.4;
-      }
-      .debug-label {
-        color: #8f8;
-        display: inline-block;
-        width: 80px;
-      }
-      .debug-value {
-        color: #fff;
-      }
-      
-      /* 控制台提示 */
-      .console-hint {
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        background: rgba(255, 100, 0, 0.9);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 5px;
-        font-size: 12px;
-        z-index: 9998;
-        pointer-events: none;
-        animation: pulse 2s infinite;
-      }
-      @keyframes pulse {
-        0% { opacity: 0.7; }
-        50% { opacity: 1; }
-        100% { opacity: 0.7; }
-      }
     </style>
     <script type="module" crossorigin src="/lingx-website-v2/assets/index-7J8Dm26U.js"></script>
     <link rel="stylesheet" crossorigin href="/lingx-website-v2/assets/index-DbLWS3mL.css">
   </head>
   <body>
     <div id="root"></div>
-    
-    <!-- 调试信息覆盖层 -->
-    <div id="debugOverlay" class="debug-overlay">
-      <h3>🔧 Zero Tech 调试面板</h3>
-      <div><span class="debug-label">窗口尺寸:</span> <span id="windowSize" class="debug-value">检测中...</span></div>
-      <div><span class="debug-label">设备DPI:</span> <span id="dpi" class="debug-value">检测中...</span></div>
-      <div><span class="debug-label">Three.js:</span> <span id="threeStatus" class="debug-value">等待初始化</span></div>
-      <div><span class="debug-label">相机位置:</span> <span id="cameraPos" class="debug-value">未知</span></div>
-      <div><span class="debug-label">画布尺寸:</span> <span id="canvasSize" class="debug-value">未知</span></div>
-      <div><span class="debug-label">当前时间:</span> <span id="currentTime" class="debug-value">--:--:--</span></div>
-      <div><span class="debug-label">Logo尺寸:</span> <span class="debug-value">已增大150%</span></div>
-      <div><span class="debug-label">相机FOV:</span> <span class="debug-value">85° (已调整)</span></div>
-    </div>
-    
-    <!-- 控制台提示 -->
-    <div class="console-hint">
-      💡 请按 F12 打开控制台查看详细日志
-    </div>
-    
-    <script>
-      // 全局调试对象
-      window.ZeroTechDebug = {
-        threejsInitialized: false,
-        cameraInfo: null,
-        canvasInfo: null,
-        errors: []
-      };
-      
-      // 更新调试信息
-      function updateDebugInfo() {
-        document.getElementById('windowSize').textContent = 
-          window.innerWidth + '×' + window.innerHeight;
-        document.getElementById('dpi').textContent = window.devicePixelRatio;
-        document.getElementById('currentTime').textContent = 
-          new Date().toLocaleTimeString();
-          
-        if (window.ZeroTechDebug.threejsInitialized) {
-          document.getElementById('threeStatus').textContent = '✅ 已初始化';
-          document.getElementById('threeStatus').style.color = '#0f0';
-        }
-        
-        if (window.ZeroTechDebug.cameraInfo) {
-          const cam = window.ZeroTechDebug.cameraInfo;
-          document.getElementById('cameraPos').textContent = 
-            `X:${cam.x.toFixed(1)} Y:${cam.y.toFixed(1)} Z:${cam.z.toFixed(1)}`;
-        }
-        
-        if (window.ZeroTechDebug.canvasInfo) {
-          const canvas = window.ZeroTechDebug.canvasInfo;
-          document.getElementById('canvasSize').textContent = 
-            canvas.width + '×' + canvas.height;
-        }
-        
-        // 显示错误
-        if (window.ZeroTechDebug.errors.length > 0) {
-          const errorDiv = document.createElement('div');
-          errorDiv.innerHTML = `<span class=\"debug-label\" style=\"color:#f88\">错误:</span> <span style=\"color:#f88\">${window.ZeroTechDebug.errors.length}个</span>`;
-          document.getElementById('debugOverlay').appendChild(errorDiv);
-        }
-      }
-      
-      // 监听Three.js初始化
-      const originalLog = console.log;
-      console.log = function(...args) {
-        originalLog.apply(console, args);
-        
-        // 检测Three.js消息
-        const message = args[0] || '';
-        if (typeof message === 'string') {
-          if (message.includes('Three.js')) {
-            window.ZeroTechDebug.threejsInitialized = true;
-            
-            // 提取相机信息
-            if (args[1] && args[1].includes('相机位置')) {
-              const posMatch = args[2] && args[2].match(/[\d.-]+/g);
-              if (posMatch && posMatch.length >= 3) {
-                window.ZeroTechDebug.cameraInfo = {
-                  x: parseFloat(posMatch[0]),
-                  y: parseFloat(posMatch[1]),
-                  z: parseFloat(posMatch[2])
-                };
-              }
-            }
-            
-            // 提取画布信息
-            if (args[1] && args[1].includes('画布尺寸')) {
-              const sizeMatch = args[2] && args[2].match(/\d+/g);
-              if (sizeMatch && sizeMatch.length >= 2) {
-                window.ZeroTechDebug.canvasInfo = {
-                  width: parseInt(sizeMatch[0]),
-                  height: parseInt(sizeMatch[1])
-                };
-              }
-            }
-            
-            updateDebugInfo();
-          }
-        }
-      };
-      
-      // 监听错误
-      window.addEventListener('error', (event) => {
-        window.ZeroTechDebug.errors.push({
-          message: event.message,
-          filename: event.filename,
-          lineno: event.lineno
-        });
-        updateDebugInfo();
-      });
-      
-      // 初始更新
-      updateDebugInfo();
-      setInterval(updateDebugInfo, 1000);
-      
-      // 页面加载完成
-      window.addEventListener('load', () => {
-        console.log('=== 页面加载完成 ===');
-        console.log('URL:', window.location.href);
-        console.log('User Agent:', navigator.userAgent);
-        console.log('=== 开始Three.js初始化 ===');
-      });
-    </script>
   </body>
 </html>

@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-04-21T12:36:05.396Z",
+  "workspaceRoot": "/home/tance/.openclaw/workspace/lingx-website",
+  "weightsSource": "default",
+  "prompt": "bypassPermissions",
+  "taskCandidates": [],
+  "taskUnresolved": [
+    "no terrain node matched prompt signals"
+  ],
+  "actionCandidates": [],
+  "touchedFiles": []
+}

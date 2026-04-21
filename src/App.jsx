@@ -199,6 +199,49 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [currentStage, canScroll, entranceComplete, setCurrentStage, setStageVisible])
   
+  // 移动端触摸手势支持
+  useEffect(() => {
+    let touchStartY = 0
+    let touchEndY = 0
+    
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY
+    }
+    
+    const handleTouchEnd = (e) => {
+      if (!canScroll || !entranceComplete) return
+      touchEndY = e.changedTouches[0].clientY
+      const diff = touchStartY - touchEndY
+      const threshold = 50
+      
+      if (diff > threshold && currentStage < 4) {
+        // 向上滑动 - 下一阶段
+        const nextStage = currentStage + 1
+        setStageVisible(nextStage, true)
+        setCurrentStage(nextStage)
+        window.scrollTo({
+          top: nextStage * window.innerHeight,
+          behavior: 'smooth'
+        })
+      } else if (diff < -threshold && currentStage > 0) {
+        // 向下滑动 - 上一阶段
+        const prevStage = currentStage - 1
+        setCurrentStage(prevStage)
+        window.scrollTo({
+          top: prevStage * window.innerHeight,
+          behavior: 'smooth'
+        })
+      }
+    }
+    
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchend', handleTouchEnd, { passive: true })
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [currentStage, canScroll, entranceComplete, setCurrentStage, setStageVisible])
+  
   const handleScrollClick = () => {
     if (canScroll && entranceComplete) {
       setStageVisible(1, true)
